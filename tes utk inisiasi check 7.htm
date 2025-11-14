@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Rahasia</title>
+  <style>
+    :root {
+      --base-font: 1rem;
+      --phi: 1.618;
+      --font-small: calc(var(--base-font) / var(--phi));
+      --font-medium: var(--base-font);
+      --font-large: calc(var(--base-font) * var(--phi));
+      --font-xlarge: calc(var(--font-large) * var(--phi));
+    }
+
+    * { font-family: 'Times New Roman', Times, serif !important; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      background: #111;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('FOTBAR(1).jpg') center/cover no-repeat;
+      filter: brightness(0.4);
+      z-index: 0;
+    }
+
+    .quiz-box {
+      position: relative;
+      z-index: 1;
+      background-color: #800000;
+      color: white;
+      padding: 70px 60px;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+      width: 95%;
+      max-width: 750px;
+      min-height: 450px; 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    h2 { font-size: var(--font-xlarge); margin-top: 0; margin-bottom: 24px; }
+
+    p { font-size: var(--font-medium); margin-bottom: 16px; }
+
+    input[type="text"] {
+      padding: 12px;
+      width: 80%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: var(--font-medium);
+      text-align: center;
+      margin: 0 auto 18px auto;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus { border-color: white; outline: none; }
+
+    .button-group { display:flex; justify-content:center; gap:10px; margin-bottom:0; }
+
+    button, #timer {
+      background: white; color: #800000; border: none; padding: 10px 20px;
+      border-radius: 8px; cursor: pointer; font-size: var(--font-medium);
+    }
+    button:hover { background:#f4f4f4; transform: scale(1.02); transition: .15s; }
+    #timer { display:inline-block; cursor: default; }
+
+    /* style pesan rahasia (gambar atau teks) */
+    .secret-wrap { padding: 10px; }
+    .secret-img { width:100%; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+    .secret-text { font-size:calc(1rem * 1.2); line-height:1.4; }
+  </style>
+</head>
+<body>
+  <div class="quiz-box" id="quizBox">
+    <div id="questionArea">
+      <h2>Siapakah Wakain Ideal PK XXXII</h2>
+      <p><strong>Ca. Ang. PK XXXII</strong></p>
+      <input type="text" id="answer" placeholder="Jawab disini, Ca. Ang.">
+    </div>
+
+    <div class="button-group">
+      <button id="submitBtn" onclick="checkAnswer()">Kirim Jawaban</button>
+      <div id="timer">Waktu tersisa: 5:00</div>
+    </div>
+  </div>
+
+  <script>
+    let totalSeconds = 5 * 60; // 5 menit
+    const timerDisplay = document.getElementById('timer');
+    const answerInput = document.getElementById('answer');
+    const submitBtn = document.getElementById('submitBtn');
+    const quizBox = document.getElementById('quizBox');
+    const questionArea = document.getElementById('questionArea');
+
+    // ---> ubah di sini jika mau gambar sebagai pesan rahasia
+    // bisa berupa tag <img ...> atau <div class="secret-text">teks</div>
+    const responses = {
+      // key harus lowercase karena kita akan lowercas-kan input
+      'andarysti': '<div class="secret-wrap"><img src="stukas1.jpg" alt="studi kasus" class="secret-img"></div>',
+      'priambodo': '<div class="secret-wrap"><img src="stukas2.jpg" alt="studi kasus" class="secret-img"></div>',
+      'kuntoadji': '<div class="secret-wrap"><img src="stukas3.jpg" alt="studi kasus" class="secret-img"></div>'
+    };
+
+    // timer countdown
+    const countdown = setInterval(() => {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      timerDisplay.textContent = `Waktu tersisa: ${minutes}:${String(seconds).padStart(2,'0')}`;
+
+      if (totalSeconds <= 0) {
+        clearInterval(countdown);
+        alert('Waktu habis! Kamu tidak bisa menjawab lagi.');
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+        submitBtn.style.background = 'gray';
+      }
+      totalSeconds--;
+    }, 1000);
+
+    function checkAnswer() {
+      if (answerInput.disabled) {
+        alert('Waktu sudah habis, kamu tidak bisa menjawab lagi!');
+        return;
+      }
+
+      // normalisasi: hapus spasi ekstra + lowercase
+      const raw = answerInput.value || '';
+      const normalized = raw.trim().toLowerCase();
+
+      if (normalized === '') {
+        alert('Jawaban tidak boleh kosong!');
+        return;
+      }
+
+      // cek jawaban
+      if (responses.hasOwnProperty(normalized)) {
+        clearInterval(countdown);
+        // tampilkan pesan rahasia di dalam .quiz-box tanpa menghilangkan background
+        quizBox.innerHTML = `
+          <div style="padding:20px;">
+            ${responses[normalized]}
+          </div>
+        `;
+      } else {
+        alert('❌ Jawaban salah atau tidak terdaftar!');
+      }
+    }
+
+    // (opsional) support tombol Enter untuk submit
+    answerInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        checkAnswer();
+      }
+    });
+  </script>
+</body>
+</html>
