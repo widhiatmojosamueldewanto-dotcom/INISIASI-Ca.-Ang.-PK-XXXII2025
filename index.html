@@ -14,9 +14,7 @@
       --font-xlarge: calc(var(--font-large) * var(--phi));
     }
 
-    * {
-      font-family: 'Times New Roman', Times, serif !important;
-    }
+    * { font-family: 'Times New Roman', Times, serif !important; }
 
     body {
       margin: 0;
@@ -28,16 +26,15 @@
       color: white;
       position: relative;
       overflow: hidden;
+      background: #111;
     }
 
     body::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('FOTBAR.jpg') center/cover no-repeat;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('FOTBAR(1).jpg') center/cover no-repeat;
       filter: brightness(0.4);
       z-index: 0;
     }
@@ -47,28 +44,21 @@
       z-index: 1;
       background-color: #800000;
       color: white;
-      padding: 50px 40px;
-      border-radius: 16px;
-      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-      width: 80%;
-      max-width: 500px;
+      padding: 70px 60px;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+      width: 95%;
+      max-width: 750px;
+      min-height: 450px; 
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: auto;
       text-align: center;
     }
 
-    h2 {
-      font-size: var(--font-xlarge);
-      margin-top: 0;
-      margin-bottom: 30px;
-    }
+    h2 { font-size: var(--font-xlarge); margin-top: 0; margin-bottom: 24px; }
 
-    p {
-      font-size: var(--font-medium);
-      margin-bottom: 25px;
-    }
+    p { font-size: var(--font-medium); margin-bottom: 16px; }
 
     input[type="text"] {
       padding: 12px;
@@ -77,51 +67,35 @@
       border: 1px solid #ccc;
       font-size: var(--font-medium);
       text-align: center;
-      margin: 0 auto 25px auto;
+      margin: 0 auto 18px auto;
       transition: border-color 0.3s;
     }
 
-    input[type="text"]:focus {
-      border-color: white;
-      outline: none;
-    }
+    input[type="text"]:focus { border-color: white; outline: none; }
 
-    .button-group {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 0;
-    }
+    .button-group { display:flex; justify-content:center; gap:10px; margin-bottom:0; }
 
     button, #timer {
-      background: white;
-      color: #800000;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: var(--font-medium);
-      transition: background 0.3s ease, transform 0.2s;
+      background: white; color: #800000; border: none; padding: 10px 20px;
+      border-radius: 8px; cursor: pointer; font-size: var(--font-medium);
     }
+    button:hover { background:#f4f4f4; transform: scale(1.02); transition: .15s; }
+    #timer { display:inline-block; cursor: default; }
 
-    button:hover {
-      background: #f4f4f4;
-      transform: scale(1.05);
-    }
-
-    #timer {
-      display: inline-block;
-      cursor: default;
-    }
+    /* style pesan rahasia (gambar atau teks) */
+    .secret-wrap { padding: 10px; }
+    .secret-img { width:100%; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+    .secret-text { font-size:calc(1rem * 1.2); line-height:1.4; }
   </style>
 </head>
 <body>
-  <div class="quiz-box">
-    <div>
+  <div class="quiz-box" id="quizBox">
+    <div id="questionArea">
       <h2>Siapakah Wakain Ideal PK XXXII</h2>
       <p><strong>Ca. Ang. PK XXXII</strong></p>
       <input type="text" id="answer" placeholder="Jawab disini, Ca. Ang.">
     </div>
+
     <div class="button-group">
       <button id="submitBtn" onclick="checkAnswer()">Kirim Jawaban</button>
       <div id="timer">Waktu tersisa: 5:00</div>
@@ -131,15 +105,26 @@
   <script>
     let totalSeconds = 5 * 60; // 5 menit
     const timerDisplay = document.getElementById('timer');
-    const secretMessage = 'Semangat Ca. Ang.';
     const answerInput = document.getElementById('answer');
     const submitBtn = document.getElementById('submitBtn');
+    const quizBox = document.getElementById('quizBox');
+    const questionArea = document.getElementById('questionArea');
 
+    // ---> ubah di sini jika mau gambar sebagai pesan rahasia
+    // bisa berupa tag <img ...> atau <div class="secret-text">teks</div>
+    const responses = {
+      // key harus lowercase karena kita akan lowercas-kan input
+      'andarysti': '<div class="secret-wrap"><img src="stukas1.jpg" alt="studi kasus" class="secret-img"></div>',
+      'priambodo': '<div class="secret-wrap"><img src="stukas2.jpg" alt="studi kasus" class="secret-img"></div>',
+      'kuntoadji': '<div class="secret-wrap"><img src="stukas3.jpg" alt="studi kasus" class="secret-img"></div>'
+    };
+
+    // timer countdown
     const countdown = setInterval(() => {
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      timerDisplay.textContent = `Waktu tersisa: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-      
+      timerDisplay.textContent = `Waktu tersisa: ${minutes}:${String(seconds).padStart(2,'0')}`;
+
       if (totalSeconds <= 0) {
         clearInterval(countdown);
         alert('Waktu habis! Kamu tidak bisa menjawab lagi.');
@@ -156,16 +141,35 @@
         return;
       }
 
-      const answer = answerInput.value.trim().toLowerCase();
-      if (answer === 'arkan') {
-        clearInterval(countdown);
-        document.querySelector('.quiz-box').innerHTML = `<div style="font-size:calc(1rem * 1.618); color:white; font-family:'Times New Roman', Times, serif;">${secretMessage}</div>`;
-      } else if (answer === '') {
+      // normalisasi: hapus spasi ekstra + lowercase
+      const raw = answerInput.value || '';
+      const normalized = raw.trim().toLowerCase();
+
+      if (normalized === '') {
         alert('Jawaban tidak boleh kosong!');
+        return;
+      }
+
+      // cek jawaban
+      if (responses.hasOwnProperty(normalized)) {
+        clearInterval(countdown);
+        // tampilkan pesan rahasia di dalam .quiz-box tanpa menghilangkan background
+        quizBox.innerHTML = `
+          <div style="padding:20px;">
+            ${responses[normalized]}
+          </div>
+        `;
       } else {
-        alert('❌ Jawaban salah! Coba lagi.');
+        alert('❌ Jawaban salah atau tidak terdaftar!');
       }
     }
+
+    // (opsional) support tombol Enter untuk submit
+    answerInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        checkAnswer();
+      }
+    });
   </script>
 </body>
 </html>
